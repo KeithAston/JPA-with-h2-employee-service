@@ -3,6 +3,7 @@ package com.ka.employeeservice.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ka.employeeservice.exceptions.IllegalEmployeeArgumentException;
+import com.ka.employeeservice.exceptions.ResourceNotFoundException;
 import com.ka.employeeservice.models.CompanyRole;
 import com.ka.employeeservice.models.Employee;
 import com.ka.employeeservice.repository.EmployeeRepository;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -25,8 +27,12 @@ public class EmployeeService {
     private EmployeeRepository employeeRepository;
 
     @Transactional
-    public List<Employee> getAllEmployees(){
-        return employeeRepository.findAll();
+    public List<Employee> getAllEmployees() throws ResourceNotFoundException {
+        var employeesFound = employeeRepository.findAll();
+        if(employeesFound.isEmpty()){
+            throw new ResourceNotFoundException("No Employees Found");
+        }
+        return employeesFound;
     }
 
     @Transactional
@@ -34,6 +40,25 @@ public class EmployeeService {
         validateEmployee(employee);
         employeeRepository.save(employee);
         return "Employee saved successfully";
+    }
+
+    @Transactional
+    public Employee findEmployee(int id) throws ResourceNotFoundException {
+        Long longId = (long) id;
+        Optional<Employee> employee = employeeRepository.findById(longId);
+        if (employee.isPresent()){
+            return employee.get();
+        } else {
+            throw new ResourceNotFoundException("Employee with id " + id + " not found");
+        }
+    }
+
+    @Transactional
+    public String deleteEmployee(int id) throws ResourceNotFoundException {
+        findEmployee(id);
+        Long longId = (long) id;
+        employeeRepository.deleteById(longId);
+        return "Successfully deleted employee " + id;
     }
 
     private void validateEmployee(Employee employee) throws IllegalEmployeeArgumentException {
