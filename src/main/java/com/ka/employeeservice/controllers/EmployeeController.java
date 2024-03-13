@@ -1,6 +1,7 @@
 package com.ka.employeeservice.controllers;
 
 import com.ka.employeeservice.exceptions.IllegalEmployeeArgumentException;
+import com.ka.employeeservice.exceptions.ResourceNotFoundException;
 import com.ka.employeeservice.models.Employee;
 import com.ka.employeeservice.services.EmployeeService;
 import jakarta.validation.Valid;
@@ -26,10 +27,21 @@ public class EmployeeController {
         return new ResponseEntity<>(employeeService.createEmployee(employee), HttpStatus.OK);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Employee>> getAllEmployees(){
+    @GetMapping("/findAll")
+    public ResponseEntity<List<Employee>> getAllEmployees() throws ResourceNotFoundException {
         return new ResponseEntity<>(employeeService.getAllEmployees(), HttpStatus.OK);
     }
+
+    @GetMapping("/find/{id}")
+    public ResponseEntity<Employee> findEmployee(@PathVariable int id) throws ResourceNotFoundException {
+        return new ResponseEntity<>(employeeService.findEmployee(id), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteEmployee(@PathVariable int id) throws ResourceNotFoundException {
+        return new ResponseEntity<>(employeeService.deleteEmployee(id), HttpStatus.OK);
+    }
+
 
 
 
